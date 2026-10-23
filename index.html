@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#4F6BED" />
+  <meta name="description" content="ملاحظاتي — مساحتك الآمنة لتنظيم ملاحظاتك وأفكارك. حسابات حقيقية وقاعدة بيانات سحابية آمنة." />
+  <title>ملاحظاتي</title>
+
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="assets/css/base.css" />
+  <link rel="stylesheet" href="assets/css/components.css" />
+  <link rel="stylesheet" href="assets/css/layout.css" />
+  <link rel="stylesheet" href="assets/css/views.css" />
+
+  <style>
+    /* ------------------------- شريط حالة السحابة ------------------------- */
+    .cloud-chip {
+      position: fixed;
+      inset-block-end: 1.25rem;
+      inset-inline-end: 1.25rem;
+      z-index: 300;
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      max-width: min(26rem, calc(100vw - 2.5rem));
+      padding: .625rem .75rem;
+      border-radius: 14px;
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 30px -12px rgba(15, 20, 45, .35);
+      font-size: .75rem;
+      line-height: 1.5;
+    }
+
+    .cloud-chip[hidden] { display: none; }
+
+    .cloud-chip__dot {
+      flex: 0 0 auto;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #10B981;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, .18);
+    }
+
+    .cloud-chip__text { min-width: 0; }
+    .cloud-chip__text b { display: block; font-size: .8125rem; font-weight: 700; }
+    .cloud-chip__text span { color: var(--text-muted); }
+
+    .cloud-chip__link {
+      flex: 0 0 auto;
+      color: var(--primary-600);
+      font-weight: 600;
+      text-decoration: none;
+      padding: .25rem .5rem;
+      border-radius: 8px;
+    }
+    .cloud-chip__link:hover { background: var(--surface-3); }
+
+    .cloud-chip__close {
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      width: 26px;
+      height: 26px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 1rem;
+      line-height: 1;
+      cursor: pointer;
+    }
+    .cloud-chip__close:hover { background: var(--surface-3); color: var(--text); }
+
+    /* ------------------------- شاشة الإعداد ------------------------- */
+    .setup {
+      position: fixed;
+      inset: 0;
+      z-index: 400;
+      display: grid;
+      place-items: center;
+      padding: 1.5rem;
+      background: var(--bg);
+      overflow-y: auto;
+    }
+
+    .setup__card {
+      width: 100%;
+      max-width: 34rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 1.75rem;
+      box-shadow: 0 24px 60px -30px rgba(15, 20, 45, .45);
+    }
+
+    .setup__icon {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: var(--primary-50);
+      color: var(--primary-600);
+      margin-block-end: 1rem;
+      font-size: 1.25rem;
+    }
+
+    .setup__title { font-size: 1.125rem; font-weight: 700; margin: 0 0 .375rem; }
+    .setup__text { font-size: .875rem; color: var(--text-secondary); line-height: 1.8; margin: 0 0 1rem; }
+
+    .setup__steps {
+      margin: 0 0 1.25rem;
+      padding-inline-start: 1.15rem;
+      font-size: .8125rem;
+      color: var(--text-secondary);
+      line-height: 1.9;
+    }
+    .setup__steps code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: .75rem;
+      background: var(--surface-3);
+      padding: .125rem .375rem;
+      border-radius: 6px;
+      direction: ltr;
+      display: inline-block;
+    }
+
+    .setup__actions { display: flex; gap: .5rem; flex-wrap: wrap; }
+
+    @media (max-width: 640px) {
+      .cloud-chip { inset-inline: .75rem; max-width: none; }
+    }
+  </style>
+</head>
+<body>
+  <!-- شاشة التحميل الأولى -->
+  <div id="boot" class="boot">
+    <div class="boot__logo" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" width="44" height="44">
+        <path d="M5 4.75A2.75 2.75 0 0 1 7.75 2h6.19c.73 0 1.43.29 1.95.8l3.31 3.31c.51.52.8 1.22.8 1.95V19.25A2.75 2.75 0 0 1 17.25 22H7.75A2.75 2.75 0 0 1 5 19.25V4.75Z" fill="currentColor" opacity=".18"/>
+        <path d="M13.5 2.8V7a1 1 0 0 0 1 1h4.2M8 12h8M8 16h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="boot__bar"><span></span></div>
+  </div>
+
+  <!-- واجهة المصادقة -->
+  <div id="auth-root" class="auth" hidden></div>
+
+  <!-- واجهة التطبيق -->
+  <div id="app-root" class="app" hidden></div>
+
+  <!-- الطبقات العائمة -->
+  <div id="modal-root" class="modal-root" hidden></div>
+  <div id="toast-root" class="toast-root" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- شريط توضيحي دائم -->
+  <aside class="cloud-chip" id="cloud-chip" role="note">
+    <span class="cloud-chip__dot" aria-hidden="true"></span>
+    <div class="cloud-chip__text">
+      <b id="cloud-chip-title">نسخة سحابية</b>
+      <span id="cloud-chip-sub">بياناتك محفوظة في حسابك على Supabase، ولا يراها أحد غيرك.</span>
+    </div>
+    <a class="cloud-chip__link" href="https://github.com/masadr-edu/mynote" target="_blank" rel="noopener noreferrer">الكود</a>
+    <button class="cloud-chip__close" type="button" aria-label="إخفاء التنبيه" data-cloud-close>×</button>
+  </aside>
+
+  <!-- مكتبة Supabase (CDN) ثم الإعدادات ثم التطبيق -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="supabase-config.js"></script>
+  <script>window.__MYNOTE_CLOUD__ = true;</script>
+  <script type="module" src="assets/js/app.js"></script>
+
+  <script>
+    /* -------------- التحقق من الإعدادات + شريط الحالة -------------- */
+    (function () {
+      var cfg = window.MYNOTE_SUPABASE || {};
+      var configured = Boolean(cfg.url && cfg.anonKey);
+
+      document.addEventListener('click', function (e) {
+        if (e.target.closest('[data-cloud-close]')) {
+          var chip = document.getElementById('cloud-chip');
+          if (chip) chip.hidden = true;
+        }
+      });
+
+      if (configured) return;
+
+      // لا يوجد اتصال مضبوط — نعرض شاشة إعداد واضحة بدل واجهة معطّلة
+      var boot = document.getElementById('boot');
+      if (boot) boot.remove();
+
+      var panel = document.createElement('div');
+      panel.className = 'setup';
+      panel.setAttribute('role', 'alert');
+      panel.innerHTML =
+        '<div class="setup__card">' +
+        '  <div class="setup__icon" aria-hidden="true">⚙️</div>' +
+        '  <h1 class="setup__title">لم يتم ربط Supabase بعد</h1>' +
+        '  <p class="setup__text">هذه النسخة تعمل بقاعدة بيانات سحابية، وتحتاج إلى مشروع Supabase واحد لتفعيلها.</p>' +
+        '  <ol class="setup__steps">' +
+        '    <li>أنشئ مشروعاً على <a href="https://supabase.com/dashboard" target="_blank" rel="noopener">supabase.com</a>.</li>' +
+        '    <li>نفّذ ملف <code>supabase/schema.sql</code> في محرّر SQL داخل المشروع.</li>' +
+        '    <li>من <b>Settings → API</b> انسخ <code>Project URL</code> و <code>anon key</code>.</li>' +
+        '    <li>ضعهما في الملف <code>cloud/supabase-config.js</code> ثم شغّل <code>node scripts/build-docs.mjs</code>.</li>' +
+        '  </ol>' +
+        '  <div class="setup__actions">' +
+        '    <button class="btn btn--primary" type="button" onclick="location.reload()">تحقّق مرة أخرى</button>' +
+        '    <a class="btn btn--soft" href="https://github.com/masadr-edu/mynote#readme" target="_blank" rel="noopener">دليل الإعداد</a>' +
+        '  </div>' +
+        '</div>';
+
+      document.body.appendChild(panel);
+    })();
+  </script>
+</body>
+</html>
